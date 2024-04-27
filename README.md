@@ -7,3 +7,4 @@ A website showcasing various projects and achievements.
 - Mapped a custom domain name from Cloudflare using their DNS service to an Azure CDN endpoint.
 - Configured HTTPS and TLS via Azure CDN.
 - Implemented a CI/CD pipeline using GitHub Actions with YAML for automated code deployment.
+- Implemented the use of federated credentials to replace client credentials
