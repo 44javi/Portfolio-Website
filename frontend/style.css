@@ -252,28 +252,16 @@ section {
     padding-right: 1rem;
   }
 }
+
 section .row {
-  display: grid;
-  gap: 2rem;
-  grid-template-columns: 1fr 2fr;
-  grid-template-rows: 1fr;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 0 1.5rem;
 }
-@media (max-width: 56.25em) {
-  #projects .project-wrapper .row {
-    display: flex;
-    flex-direction: column;
-  }
 
-  #projects .project-wrapper__image {
-    order: -1; /* This makes the image appear first */
-    margin-bottom: 2rem;
-  }
 
-  #projects .project-wrapper__text {
-    order: 2;
-  }
-}
+
 @media (max-width: 37.5em) {
   section .row {
     padding: 0;
@@ -574,8 +562,15 @@ section .row span {
   }
 }
 #projects .project-wrapper .row {
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 1.5rem;
   margin-bottom: 8rem;
+   max-width: 600px;  /* Add this line */
+  margin-left: auto;  /* Add this line */
+  margin-right: auto;  /* Add this line */
 }
 @media (max-width: 37.5em) {
   #projects .project-wrapper .row {
@@ -584,7 +579,9 @@ section .row span {
 }
 #projects .project-wrapper__text {
   width: 100%;
-  text-align: left;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
 }
 @media (max-width: 75em) {
   #projects .project-wrapper__text {
@@ -613,11 +610,14 @@ section .row span {
   width: 100%;
   display: flex;
   align-items: center;
+  justify-content: center;
+   gap: 1rem;
   flex-wrap: wrap;
 }
 #projects .project-wrapper__image {
   width: 100%;
-  margin: 0 auto;
+  margin: 0 auto 3rem;
+  order: -1;
 }
 @media (max-width: 75em) {
   #projects .project-wrapper__image {
@@ -627,6 +627,7 @@ section .row span {
 }
 #projects .project-wrapper__image .thumbnail {
   border: none;
+  border-radius: 12px;
   box-shadow: 8px 8px 9px 7px rgba(174, 174, 192, 0.4), -5px -5px 15px 7px #fff;
 }
 #projects .project-wrapper__image .thumbnail .img-fluid {
@@ -641,5 +642,55 @@ section .row span {
     border: 1px solid #d2d2d2;
     margin-bottom: 3.2rem;
     transform: none;
+  }
+}
+
+#projects .project-wrapper .row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 1.5rem;
+  margin-bottom: 8rem;
+  border-radius: 12px;
+}
+
+#projects .project-wrapper__image {
+  width: 100%;
+  margin: 0 auto 3rem;
+  order: -1; /* This ensures image always comes first */
+}
+
+#projects .project-wrapper__text {
+  width: 100%;
+  text-align: center;
+  max-width: 800px; /* Prevents text from getting too wide */
+  margin: 0 auto;
+}
+
+/* Remove the grid layout from the general section row class */
+section .row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 1.5rem;
+}
+
+/* Adjust about section specifically to maintain its layout */
+#about .about-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+/* Keep the about section text left-aligned */
+#about .about-wrapper__info {
+  text-align: left;
+}
+
+/* Maintain the About section's responsive layout */
+@media (max-width: 37.5em) {
+  #about .about-wrapper {
+    grid-template-columns: 1fr;
   }
 }
