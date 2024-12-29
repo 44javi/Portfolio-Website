@@ -566,9 +566,9 @@ section .row span {
   text-align: center;
   padding: 0 1.5rem;
   margin-bottom: 8rem;
-   max-width: 600px;  /* Add this line */
-  margin-left: auto;  /* Add this line */
-  margin-right: auto;  /* Add this line */
+   max-width: 600px;  
+  margin-left: auto;  
+  margin-right: auto;  
 }
 @media (max-width: 37.5em) {
   #projects .project-wrapper .row {
