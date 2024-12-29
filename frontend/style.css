@@ -406,7 +406,6 @@ section .row span {
 }
 #hero {
   min-height: 100vh;
-  height: 100vh;
   display: flex;
   align-items: center;
   background: #fff;
@@ -417,7 +416,6 @@ section .row span {
   left: 0;
   bottom: 0;
   right: 0;
-  z-index: -1;
   line-height: 1.2;
   animation: hidden 1000ms linear forwards;
 }
@@ -632,7 +630,7 @@ section .row span {
   box-shadow: 8px 8px 9px 7px rgba(174, 174, 192, 0.4), -5px -5px 15px 7px #fff;
 }
 #projects .project-wrapper__image .thumbnail .img-fluid {
-  width: 40%;
+  max-width: 100%;
   height: auto;
   vertical-align: middle;
   border-radius: 2px;
