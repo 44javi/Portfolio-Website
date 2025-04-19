@@ -12,10 +12,10 @@ A personal portfolio website showcasing projects, built with modern cloud native
 * Project Structure
 
 ## Overview
-This repository contains the infrastructure code and frontend files for my personal portfolio website. It uses a modern cloud native approach using containerization, infrastructure as code, and managed cloud services.
+This repository contains the infrastructure code and frontend files for my personal portfolio website. It uses containerization, infrastructure as code, and Azure.
 
 ## Pre-requisites
-* Docker - [Installation Guide](https://docs.docker.com/get-docker/)
+* Docker    - [Installation Guide](https://docs.docker.com/get-docker/)
 * Azure CLI - [Installation Guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
 * Terraform - [Installation Guide](https://developer.hashicorp.com/terraform/install)
 * Azure Subscription
@@ -32,15 +32,17 @@ This repository contains the infrastructure code and frontend files for my perso
 2. **Application Deployment**
   * Build Docker image: `docker build -t <username>/portfolio:latest .`
   * Push to Docker Hub: `docker push <username>/portfolio:latest`
-  * Run `terraform init` in this repository
-  * Run `terraform plan` to preview
+  * Run `terraform init` 
+  * Run `terraform plan` 
   * Run `terraform apply` to deploy the Container App
 
 3. **Custom Domain Configuration**
   * After applying Terraform, you'll receive the custom domain verification ID in the terminal
   * Create DNS records in Cloudflare:
     * A record: `@ → [Container App Environment IP]`
-    * TXT record: `asuid → [Verification ID from Terraform output]`
+    * CNAME record: `www → [Container App FQDN]`
+    * TXT record: `asuid → [Custom Domain Verification ID]`
+    * TXT record: `asuid.www → [Custom Domain Verification ID]`
     * Set records to DNS-only mode initially (gray cloud)
   * Wait for certificate provisioning (status: "Secured")
   * Enable Cloudflare proxying (orange cloud)
