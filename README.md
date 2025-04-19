@@ -1,10 +1,22 @@
 # Portfolio-Website
-A website showcasing various projects and achievements.
+A personal portfolio website showcasing projects, built with modern cloud native technologies.
 
-## Process
-- Used HTML and CSS to create a portfolio website,
-- Hosted the website on Microsoft Azure using Blob storage.
-- Mapped a custom domain name from Cloudflare using their DNS service to an Azure CDN endpoint.
-- Configured HTTPS and TLS via Azure CDN.
-- Implemented a CI/CD pipeline using GitHub Actions with YAML for automated code deployment.
-- Added OpenID Connect (OIDC) based authentication with Azure Workload Identity Federation.
+### Current Architecture
+- Migrated to containerized deployment with Azure Container Apps
+- Infrastructure defined with Terraform using modular approach:
+- Multi-repository approach:
+  - Core infrastructure in a separate shared repository
+  - Application specific configurations in this repository
+- Custom domain configuration with Azure managed SSL certificates
+- DNS management through Cloudflare with:
+  - A record for apex domain
+  - CNAME record for www subdomain
+  - Required TXT records for domain verification
+
+## Technical Stack
+- **Frontend**: HTML/CSS
+- **Hosting**: Azure Container Apps
+- **Infrastructure**: Terraform
+- **DNS & Security**: Cloudflare
+- **Container**: Docker
+- **CI/CD**: Azure DevOps (In Progress)

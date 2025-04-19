@@ -52,3 +52,13 @@ resource "azurerm_container_app_custom_domain" "portfolio" {
   }
 }
 
+resource "azurerm_container_app_custom_domain" "portfolio_www" {
+  name             = "www.${var.custom_domain}"
+  container_app_id = azurerm_container_app.portfolio.id
+  
+  certificate_binding_type = "SniEnabled"
+  
+  lifecycle {
+    ignore_changes = [certificate_binding_type, container_app_environment_certificate_id]
+  }
+}
