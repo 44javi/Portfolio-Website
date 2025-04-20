@@ -48,9 +48,9 @@ This repository contains the infrastructure code and frontend files for my perso
   * Enable Cloudflare proxying (orange cloud)
 
 ### Current Architecture
-- Migrated to containerized deployment with Azure Container Apps
-- Infrastructure defined with Terraform using modular approach:
-- Multi-repository approach:
+- Migrated to containerized deployments with Azure Container Apps
+- Infrastructure defined with Terraform:
+- Multi repository approach:
   - Core infrastructure in a separate shared repository
   - Application specific configurations in this repository
 - Custom domain configuration with Azure managed SSL certificates
@@ -58,11 +58,3 @@ This repository contains the infrastructure code and frontend files for my perso
   - A record for apex domain
   - CNAME record for www subdomain
   - Required TXT records for domain verification
-
-## Technical Stack
-- **Frontend**: HTML/CSS
-- **Hosting**: Azure Container Apps
-- **Infrastructure**: Terraform
-- **DNS & Security**: Cloudflare
-- **Container**: Docker
-- **CI/CD**: Azure DevOps (In Progress)
