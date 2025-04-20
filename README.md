@@ -7,12 +7,10 @@ A personal portfolio website showcasing projects, built with modern cloud native
 * Overview
 * Pre-requisites
 * Deployment Steps
-* Architecture
-* Technical Stack
-* Project Structure
+
 
 ## Overview
-This repository contains the infrastructure code and frontend files for my personal portfolio website. It uses containerization, infrastructure as code, and Azure.
+This repository contains the infrastructure code and frontend files for my personal portfolio website. It uses containerization (Docker), infrastructure as code (Terraform), and Azure.
 
 ## Pre-requisites
 * Docker    - [Installation Guide](https://docs.docker.com/get-docker/)
@@ -47,14 +45,3 @@ This repository contains the infrastructure code and frontend files for my perso
   * Wait for certificate provisioning (status: "Secured")
   * Enable Cloudflare proxying (orange cloud)
 
-### Current Architecture
-- Migrated to containerized deployments with Azure Container Apps
-- Infrastructure defined with Terraform:
-- Multi repository approach:
-  - Core infrastructure in a separate shared repository
-  - Application specific configurations in this repository
-- Custom domain configuration with Azure managed SSL certificates
-- DNS management through Cloudflare with:
-  - A record for apex domain
-  - CNAME record for www subdomain
-  - Required TXT records for domain verification
