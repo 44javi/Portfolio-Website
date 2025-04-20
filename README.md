@@ -22,17 +22,17 @@ This repository contains the infrastructure code and frontend files for my perso
 ## Deployment Steps
 
 1. **Infrastructure Deployment**
-  * Set up shared infrastructure repository first
-  * Run `terraform init`
-  * Run `terraform plan` 
-  * Run `terraform apply` to deploy Container App Environment
+  * Set up shared infrastructure repository first 
+  * `terraform init`
+  * `terraform plan` 
+  * `terraform apply` to deploy Container App Environment
 
 2. **Application Deployment**
   * Build Docker image: `docker build -t <username>/portfolio:latest .`
   * Push to Docker Hub: `docker push <username>/portfolio:latest`
-  * Run `terraform init` 
-  * Run `terraform plan` 
-  * Run `terraform apply` to deploy the Container App
+  * `terraform init` 
+  * `terraform plan` 
+  * `terraform apply` to deploy the Container App
 
 3. **Custom Domain Configuration**
   * After applying Terraform, you'll receive the custom domain verification ID in the terminal
