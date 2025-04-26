@@ -73,7 +73,7 @@ stages:
   - stage: DeployDev
     displayName: Deploy to Development
     dependsOn: Build
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'))
+    condition: succeeded()
     variables:
       - group: portfolio-dev-variables
     jobs:
@@ -117,13 +117,18 @@ stages:
   # Test Deployment Stage
   - stage: DeployTest
     displayName: Deploy to Test
-    dependsOn: Build
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/test'))
+    dependsOn: DeployDev
+    condition: or(
+      and(succeeded('DeployDev'), eq(variables['Build.SourceBranch'], 'refs/heads/dev')),
+      eq(variables['Build.SourceBranch'], 'refs/heads/test'),
+      eq(variables['Build.SourceBranch'], 'refs/heads/main')
+      )
     variables:
       - group: portfolio-test-variables
     jobs:
       - job: Deploy
         displayName: Deploy Container App (Test)
+        #environment: test  # This creates an approval gate
         steps:
           # Download the artifacts from the build stage
           - task: DownloadBuildArtifacts@1
@@ -162,13 +167,20 @@ stages:
   # Production Deployment Stage
   - stage: DeployProd
     displayName: Deploy to Production
-    dependsOn: Build
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    dependsOn: DeployTest
+    condition: or(
+      and(succeeded('DeployTest'), or(
+      eq(variables['Build.SourceBranch'], 'refs/heads/dev'),
+      eq(variables['Build.SourceBranch'], 'refs/heads/test')
+      )),
+      eq(variables['Build.SourceBranch'], 'refs/heads/main')
+      )
     variables:
       - group: portfolio-prod-variables
     jobs:
       - job: Deploy
         displayName: Deploy Container App (Prod)
+        #environment: production  # This creates an approval gate
         steps:
           # Download the artifacts from the build stage
           - task: DownloadBuildArtifacts@1
