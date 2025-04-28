@@ -91,7 +91,7 @@ stages:
           - task: AzureCLI@2
             displayName: Update Container App (Dev)
             inputs:
-              azureSubscription: $(azureSubscription)
+              azureSubscription: Dev-Azure-Connection
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
@@ -141,7 +141,7 @@ stages:
           - task: AzureCLI@2
             displayName: Update Container App (Test)
             inputs:
-              azureSubscription: $(azureSubscription)
+              azureSubscription: Test-Azure-Connection
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
@@ -193,7 +193,7 @@ stages:
           - task: AzureCLI@2
             displayName: Update Container App (Prod)
             inputs:
-              azureSubscription: $(azureSubscription)
+              azureSubscription: Prod-Azure-Connection
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
