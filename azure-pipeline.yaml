@@ -17,7 +17,10 @@ pool:
 
 # Shared variables used across all environments
 variables:
-  - group: portfolio-shared-variables 
+  - group: portfolio-shared-variables
+  - group: portfolio-dev-variables
+  - group: portfolio-test-variables
+  - group: portfolio-prod-variables
   - name: tag
     value: "$(Build.BuildId)"
 
@@ -91,7 +94,7 @@ stages:
           - task: AzureCLI@2
             displayName: Update Container App (Dev)
             inputs:
-              azureSubscription: Dev-Azure-Connection
+              azureSubscription: $(azureSubscription)
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
@@ -141,7 +144,7 @@ stages:
           - task: AzureCLI@2
             displayName: Update Container App (Test)
             inputs:
-              azureSubscription: Test-Azure-Connection
+              azureSubscription: $(azureSubscription)
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
@@ -193,7 +196,7 @@ stages:
           - task: AzureCLI@2
             displayName: Update Container App (Prod)
             inputs:
-              azureSubscription: Prod-Azure-Connection
+              azureSubscription: $(azureSubscription)
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
