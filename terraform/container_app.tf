@@ -47,7 +47,7 @@ resource "azurerm_container_app_custom_domain" "portfolio" {
   certificate_binding_type = "SniEnabled"
 
   lifecycle {
-    // When using an Azure created Managed Certificate these values must be added to ignore_changes to prevent resource recreation.
+    // With Azure created Managed Certificates these prevent resource recreation.
     ignore_changes = [certificate_binding_type, container_app_environment_certificate_id]
   }
 }

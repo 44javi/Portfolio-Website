@@ -53,7 +53,7 @@ stages:
                 echo "Date: $(Build.BuildId)" >> $(Build.ArtifactStagingDirectory)/deployment/image-info.txt
                 echo "Branch: $(Build.SourceBranchName)" >> $(Build.ArtifactStagingDirectory)/deployment/image-info.txt
 
-          # Copy frontend files to artifacts for reference
+          # Copy frontend files to artifacts
           - task: CopyFiles@2
             displayName: "Copy Frontend Files to Artifacts"
             inputs:
