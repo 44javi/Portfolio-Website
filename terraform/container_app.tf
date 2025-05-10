@@ -10,6 +10,12 @@ resource "azurerm_container_app" "portfolio" {
 
   revision_mode = "Single"
 
+   lifecycle {
+    ignore_changes = [
+      template[0].container[0].image
+    ]
+  }
+
   template {
     container {
       name   = "portfolio"
