@@ -1,4 +1,4 @@
-FROM nginx:alpine
+FROM nginx:1.28.0-alpine3.21-slim
 
 # Copy everything in the 'frontend' folder into Nginx's default webroot
 COPY ./frontend /usr/share/nginx/html
