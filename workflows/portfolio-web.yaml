@@ -1,4 +1,4 @@
-# azure-pipelines.yml
+# portfolio-web.yml
 trigger:
   branches:
     include:
@@ -27,7 +27,7 @@ variables:
 stages:
   # Build Stage -  For all branches
   - stage: Build
-    displayName: Build and Push Stage
+    displayName: Build and Push
     jobs:
       - job: BuildAndPush
         displayName: Build and Push
