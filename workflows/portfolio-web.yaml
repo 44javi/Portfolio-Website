@@ -29,8 +29,28 @@ stages:
   - stage: Build
     displayName: Build and Push
     jobs:
+      - job: SnykScan
+        displayName: Run Snyk Security Scan
+        steps:
+          - script: |
+              echo "Installing Snyk CLI..."
+              curl -Lo snyk https://static.snyk.io/cli/latest/snyk-linux
+              chmod +x snyk
+              sudo mv snyk /usr/local/bin/
+              echo "Authenticating with Snyk..."
+              snyk auth $(SNYK_TOKEN)
+              echo "Running test with severity threshold HIGH..."
+              snyk test --all-projects --severity-threshold=high
+              echo "Monitoring the project for ongoing issues..."
+              snyk monitor --all-projects
+            displayName: "Snyk CLI Scan"
+            env:
+              SNYK_TOKEN: $(snyk_token)
+
       - job: BuildAndPush
         displayName: Build and Push
+        dependsOn: SnykScan
+        condition: succeeded()
         steps:
           - task: Docker@2
             displayName: Build and Push Docker Image
