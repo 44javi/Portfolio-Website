@@ -39,13 +39,10 @@ stages:
               sudo mv snyk /usr/local/bin/
               echo "Authenticating with Snyk..."
               snyk auth $(SNYK_TOKEN)
-              echo "Running test with severity threshold HIGH..."
-              snyk test --all-projects --severity-threshold=high
+              echo "Scanning Dockerfile for security issues..."
+              snyk container test --file=$(dockerfilePath) --severity-threshold=high
               echo "Monitoring the project for ongoing issues..."
               snyk monitor --all-projects
-            displayName: "Snyk CLI Scan"
-            env:
-              SNYK_TOKEN: $(snyk_token)
 
       - job: BuildAndPush
         displayName: Build and Push
