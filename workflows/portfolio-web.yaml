@@ -37,6 +37,23 @@ stages:
               curl -Lo snyk https://static.snyk.io/cli/latest/snyk-linux
               chmod +x snyk
               sudo mv snyk /usr/local/bin/
+
+              # Debug - Print current directory and check if Dockerfile exists
+              echo "Current directory: $(pwd)"
+              echo "Checking if Dockerfile exists at: Dockerfile"
+              if [ -f "Dockerfile" ]; then
+              echo "Dockerfile found!"
+              else
+              echo "Dockerfile not found at root level."
+              echo "Listing directory contents:"
+              ls -la
+              echo "Checking specific path: $(dockerfilePath)"
+              if [ -f "$(dockerfilePath)" ]; then
+              echo "Dockerfile found at specified path!"
+              else
+              echo "Dockerfile not found at specified path either."
+              fi
+              fi
               echo "Authenticating with Snyk..."
               snyk auth $(SNYK_TOKEN)
               echo "Scanning Dockerfile for security issues..."
