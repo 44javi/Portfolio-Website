@@ -29,38 +29,6 @@ stages:
   - stage: Build
     displayName: Build and Push
     jobs:
-      - job: SnykScan
-        displayName: Run Snyk Security Scan
-        steps:
-          - script: |
-              echo "Installing Snyk CLI..."
-              curl -Lo snyk https://static.snyk.io/cli/latest/snyk-linux
-              chmod +x snyk
-              sudo mv snyk /usr/local/bin/
-
-              # Debug - Print current directory and check if Dockerfile exists
-              echo "Current directory: $(pwd)"
-              echo "Checking if Dockerfile exists at: Dockerfile"
-              if [ -f "Dockerfile" ]; then
-              echo "Dockerfile found!"
-              else
-              echo "Dockerfile not found at root level."
-              echo "Listing directory contents:"
-              ls -la
-              echo "Checking specific path: $(dockerfilePath)"
-              if [ -f "$(dockerfilePath)" ]; then
-              echo "Dockerfile found at specified path!"
-              else
-              echo "Dockerfile not found at specified path either."
-              fi
-              fi
-              echo "Authenticating with Snyk..."
-              snyk auth $(SNYK_TOKEN)
-              echo "Scanning Dockerfile for security issues..."
-              snyk container test --file=$(dockerfilePath) --severity-threshold=high
-              echo "Monitoring the project for ongoing issues..."
-              snyk monitor --all-projects
-
       - job: BuildAndPush
         displayName: Build and Push
         dependsOn: SnykScan
@@ -77,6 +45,21 @@ stages:
                 $(tag)
                 latest
 
+      - job: SnykScan
+        displayName: Run Snyk Security Scan
+        steps:
+          - script: |
+              echo "Installing Snyk CLI..."
+              curl -Lo snyk https://static.snyk.io/cli/latest/snyk-linux
+              chmod +x snyk
+              sudo mv snyk /usr/local/bin/
+              echo "Authenticating with Snyk..."
+              snyk auth $(SNYK_TOKEN)
+              echo "Running test with severity threshold HIGH..."
+              snyk test --all-projects --severity-threshold=high
+              echo "Monitoring the project for ongoing issues..."
+              snyk monitor --all-projects
+              
           # Create an artifact containing deployment info
           - task: Bash@3
             displayName: "Generate Deployment Manifest"
