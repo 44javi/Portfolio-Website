@@ -44,7 +44,7 @@ stages:
                 latest
 
       - job: SnykScan
-        displayName: Run Snyk Security Scan
+        displayName: Run Snyk Security Scans
         dependsOn: BuildAndPush
         steps:
           - script: |
