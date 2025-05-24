@@ -59,7 +59,7 @@ stages:
               echo "Scanning Container Image..."
               snyk container monitor $(imageRepository):$(tag) --org=$(snyk_org) --project-name="Portfolio-Website"
               echo "Scanning Infrastructure..."
-              snyk iac test --report --org=$(snyk_org) --project-name="Portfolio-Website"
+              snyk iac monitor --org=$(snyk_org) --project-name="Portfolio-Website"
 
           # Create an artifact containing deployment info
           - task: Bash@3
