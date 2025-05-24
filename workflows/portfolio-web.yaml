@@ -31,8 +31,6 @@ stages:
     jobs:
       - job: BuildAndPush
         displayName: Build and Push
-        dependsOn: SnykScan
-        condition: succeeded()
         steps:
           - task: Docker@2
             displayName: Build and Push Docker Image
@@ -47,6 +45,7 @@ stages:
 
       - job: SnykScan
         displayName: Run Snyk Security Scan
+        dependsOn: BuildAndPush
         steps:
           - script: |
               echo "Installing Snyk CLI..."
