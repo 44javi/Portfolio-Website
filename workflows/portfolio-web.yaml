@@ -18,9 +18,9 @@ pool:
 # Shared variables used across all environments
 variables:
   - group: shared-variables
-  - group: portfolio-dev-variables
-  - group: portfolio-test-variables
-  - group: portfolio-prod-variables
+  - group: portfolio-variables-dev
+  - group: portfolio-variables-test
+  - group: portfolio-variables-prod
   - name: tag
     value: "$(Build.BuildId)"
 
@@ -96,7 +96,7 @@ stages:
     dependsOn: Build
     condition: succeeded()
     variables:
-      - group: portfolio-dev-variables
+      - group: portfolio-variables-dev
     jobs:
       - job: Deploy
         displayName: Deploy Container App (Dev)
@@ -145,7 +145,7 @@ stages:
       eq(variables['Build.SourceBranch'], 'refs/heads/main')
       )
     variables:
-      - group: portfolio-test-variables
+      - group: portfolio-variables-test
     jobs:
       - job: Deploy
         displayName: Deploy Container App (Test)
@@ -197,7 +197,7 @@ stages:
       eq(variables['Build.SourceBranch'], 'refs/heads/main')
       )
     variables:
-      - group: portfolio-prod-variables
+      - group: portfolio-variables-prod
     jobs:
       - job: Deploy
         displayName: Deploy Container App (Prod)
