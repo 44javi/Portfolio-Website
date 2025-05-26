@@ -17,7 +17,7 @@ pool:
 
 # Shared variables used across all environments
 variables:
-  - group: portfolio-shared-variables
+  - group: shared-variables
   - group: portfolio-dev-variables
   - group: portfolio-test-variables
   - group: portfolio-prod-variables
