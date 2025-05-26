@@ -17,10 +17,10 @@ pool:
 
 # Shared variables used across all environments
 variables:
-  - group: portfolio-shared-variables
-  - group: portfolio-dev-variables
-  - group: portfolio-test-variables
-  - group: portfolio-prod-variables
+  - group: shared-variables
+  - group: portfolio-variables-dev
+  - group: portfolio-variables-test
+  - group: portfolio-variables-prod
   - name: tag
     value: "$(Build.BuildId)"
 

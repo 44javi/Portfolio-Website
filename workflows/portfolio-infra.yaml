@@ -1,0 +1,267 @@
+# infra-pipeline.yml
+trigger:
+  branches:
+    include:
+      - dev
+      - test
+      - main
+  paths:
+    include:
+      - "terraform/**"
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+  - group: terraform-backend-config
+  - group: terraform-variables-dev
+  - group: terraform-variables-test
+  - group: terraform-variables-prod
+  - name: TF_VERSION
+    value: '1.5.0'
+
+stages:
+  # Validate Stage - runs for all branches
+  - stage: Validate
+    displayName: 'Validate Terraform'
+    jobs:
+      - job: TerraformValidate
+        displayName: 'Terraform Validation'
+        steps:
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: $(TF_VERSION)
+          
+          - script: |
+              cd terraform/
+              echo "Initializing Terraform for validation..."
+              terraform init -backend=false
+              
+              echo "Checking Terraform formatting..."
+              terraform fmt -check -recursive
+              
+              echo "Validating Terraform configuration..."
+              terraform validate
+            displayName: 'Init, Format Check & Validate'
+
+          - script: |
+              echo "Installing Snyk CLI..."
+              curl -Lo snyk https://static.snyk.io/cli/latest/snyk-linux
+              chmod +x snyk
+              sudo mv snyk /usr/local/bin/
+              
+              echo "Running Snyk IaC scan on source files..."
+              snyk auth $(SNYK_TOKEN)
+              snyk iac test terraform/ --report --org=$(snyk_org)
+            displayName: 'Security Scan - Source Files'
+
+          # Publish initialized Terraform directory as artifact
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Terraform Directory"
+            inputs:
+              PathtoPublish: "terraform/"
+              ArtifactName: "terraform-initialized"
+              publishLocation: "Container"
+
+  # Development Deployment Stage
+  - stage: DeployDev
+    displayName: Deploy to Development
+    dependsOn: Validate
+    condition: succeeded()
+    variables:
+      - group: terraform-variables-dev
+    jobs:
+      - job: Deploy
+        displayName: Deploy Infrastructure (Dev)
+        steps:
+          # Download the initialized Terraform directory
+          - task: DownloadBuildArtifacts@1
+            inputs:
+              buildType: "current"
+              downloadType: "single"
+              artifactName: "terraform-initialized"
+              downloadPath: "$(System.ArtifactsDirectory)"
+
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: $(TF_VERSION)
+
+          - script: |
+              # Copy terraform files to working directory
+              cp -r $(System.ArtifactsDirectory)/terraform-initialized/* ./
+              cd terraform/
+              
+              echo "Re-initializing Terraform with backend for Dev environment..."
+              terraform init \
+                -backend-config="storage_account_name=$(TF_BACKEND_STORAGE_ACCOUNT)" \
+                -backend-config="container_name=$(TF_BACKEND_CONTAINER)" \
+                -backend-config="key=dev/$(TF_BACKEND_KEY)" \
+                -backend-config="access_key=$(TF_BACKEND_ACCESS_KEY)"
+              
+              echo "Planning Dev infrastructure changes..."
+              terraform plan -out=tfplan.binary \
+                -var-file="environments/dev.tfvars" \
+                -var="subscription_id=$(SUBSCRIPTION_ID)" \
+                -var="alert_email=$(ALERT_EMAIL)" \
+                -var="trusted_ip_ranges=[\"$(TRUSTED_IP_RANGES)\"]"
+              
+              echo "Converting plan to JSON for scanning..."
+              terraform show -json tfplan.binary > tf-plan.json
+            displayName: 'Terraform Plan - Dev'
+
+          - script: |
+              echo "Scanning Terraform plan for Dev..."
+              snyk auth $(SNYK_TOKEN)
+              snyk iac test tf-plan.json --report --org=$(snyk_org)
+            displayName: 'Security Scan - Dev Plan'
+
+          - script: |
+              echo "Applying Dev infrastructure changes..."
+              terraform apply -auto-approve tfplan.binary
+              
+              echo "Recording deployment info..."
+              echo "Environment: Dev" > deployment-info.txt
+              echo "Build: $(Build.BuildNumber)" >> deployment-info.txt
+              echo "Commit: $(Build.SourceVersion)" >> deployment-info.txt
+              echo "Date: $(Build.BuildId)" >> deployment-info.txt
+              echo "Branch: $(Build.SourceBranchName)" >> deployment-info.txt
+            displayName: 'Apply Terraform Plan - Dev'
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Deployment Results"
+            inputs:
+              PathtoPublish: "terraform/deployment-info.txt"
+              ArtifactName: "deployment-results-dev"
+              publishLocation: "Container"
+
+  # Test Deployment Stage
+  - stage: DeployTest
+    displayName: Deploy to Test
+    dependsOn: DeployDev
+    condition: or(
+      and(succeeded('DeployDev'), eq(variables['Build.SourceBranch'], 'refs/heads/dev')),
+      eq(variables['Build.SourceBranch'], 'refs/heads/test'),
+      eq(variables['Build.SourceBranch'], 'refs/heads/main')
+      )
+    variables:
+      - group: terraform-variables-test
+    jobs:
+      - job: Deploy
+        displayName: Deploy Infrastructure (Test)
+        #environment: test-infrastructure  # Uncomment to add approval gate
+        steps:
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: $(TF_VERSION)
+
+          - script: |
+              cd terraform/
+              echo "Initializing Terraform for Test environment..."
+              terraform init \
+                -backend-config="storage_account_name=$(TF_BACKEND_STORAGE_ACCOUNT)" \
+                -backend-config="container_name=$(TF_BACKEND_CONTAINER)" \
+                -backend-config="key=test/$(TF_BACKEND_KEY)" \
+                -backend-config="access_key=$(TF_BACKEND_ACCESS_KEY)"
+              
+              echo "Planning Test infrastructure changes..."
+              terraform plan -out=tfplan.binary \
+                -var-file="environments/test.tfvars" \
+                -var="subscription_id=$(SUBSCRIPTION_ID)" \
+                -var="alert_email=$(ALERT_EMAIL)" \
+                -var="trusted_ip_ranges=[\"$(TRUSTED_IP_RANGES)\"]"
+              
+              echo "Converting plan to JSON for scanning..."
+              terraform show -json tfplan.binary > tf-plan.json
+            displayName: 'Terraform Plan - Test'
+
+          - script: |
+              echo "Scanning Terraform plan for Test..."
+              snyk auth $(SNYK_TOKEN)
+              snyk iac test tf-plan.json --report --org=$(snyk_org)
+            displayName: 'Security Scan - Test Plan'
+
+          - script: |
+              echo "Applying Test infrastructure changes..."
+              terraform apply -auto-approve tfplan.binary
+              
+              echo "Recording deployment info..."
+              echo "Environment: Test" > deployment-info.txt
+              echo "Build: $(Build.BuildNumber)" >> deployment-info.txt
+              echo "Commit: $(Build.SourceVersion)" >> deployment-info.txt
+              echo "Date: $(Build.BuildId)" >> deployment-info.txt
+              echo "Branch: $(Build.SourceBranchName)" >> deployment-info.txt
+            displayName: 'Apply Terraform Plan - Test'
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Deployment Results"
+            inputs:
+              PathtoPublish: "terraform/deployment-info.txt"
+              ArtifactName: "deployment-results-test"
+              publishLocation: "Container"
+
+  # Production Deployment Stage
+  - stage: DeployProd
+    displayName: Deploy to Production
+    dependsOn: DeployTest
+    condition: or(
+      and(succeeded('DeployTest'), or(
+      eq(variables['Build.SourceBranch'], 'refs/heads/dev'),
+      eq(variables['Build.SourceBranch'], 'refs/heads/test')
+      )),
+      eq(variables['Build.SourceBranch'], 'refs/heads/main')
+      )
+    variables:
+      - group: terraform-variables-prod
+    jobs:
+      - job: Deploy
+        displayName: Deploy Infrastructure (Prod)
+        #environment: production-infrastructure  # Uncomment to add approval gate
+        steps:
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: $(TF_VERSION)
+
+          - script: |
+              cd terraform/
+              echo "Initializing Terraform for Production environment..."
+              terraform init \
+                -backend-config="storage_account_name=$(TF_BACKEND_STORAGE_ACCOUNT)" \
+                -backend-config="container_name=$(TF_BACKEND_CONTAINER)" \
+                -backend-config="key=prod/$(TF_BACKEND_KEY)" \
+                -backend-config="access_key=$(TF_BACKEND_ACCESS_KEY)"
+              
+              echo "Planning Production infrastructure changes..."
+              terraform plan -out=tfplan.binary \
+                -var-file="environments/prod.tfvars" \
+                -var="subscription_id=$(SUBSCRIPTION_ID)" \
+                -var="alert_email=$(ALERT_EMAIL)" \
+                -var="trusted_ip_ranges=[\"$(TRUSTED_IP_RANGES)\"]"
+              
+              echo "Converting plan to JSON for scanning..."
+              terraform show -json tfplan.binary > tf-plan.json
+            displayName: 'Terraform Plan - Prod'
+
+          - script: |
+              echo "Scanning Terraform plan for Production..."
+              snyk auth $(SNYK_TOKEN)
+              snyk iac test tf-plan.json --report --org=$(snyk_org)
+            displayName: 'Security Scan - Prod Plan'
+
+          - script: |
+              echo "Applying Production infrastructure changes..."
+              terraform apply -auto-approve tfplan.binary
+              
+              echo "Recording deployment info..."
+              echo "Environment: Production" > deployment-info.txt
+              echo "Build: $(Build.BuildNumber)" >> deployment-info.txt
+              echo "Commit: $(Build.SourceVersion)" >> deployment-info.txt
+              echo "Date: $(Build.BuildId)" >> deployment-info.txt
+              echo "Branch: $(Build.SourceBranchName)" >> deployment-info.txt
+            displayName: 'Apply Terraform Plan - Prod'
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Deployment Results"
+            inputs:
+              PathtoPublish: "terraform/deployment-info.txt"
+              ArtifactName: "deployment-results-prod"
+              publishLocation: "Container"
