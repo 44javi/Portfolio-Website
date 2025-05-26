@@ -21,12 +21,12 @@ variables:
     value: '1.5.0'
 
 stages:
-  # Validate Stage - runs for all branches
-  - stage: Validate
-    displayName: 'Validate Terraform'
+  # runs for all branches
+  - stage: Initialize
+    displayName: 'Initialize Terraform'
     jobs:
-      - job: TerraformValidate
-        displayName: 'Terraform Validation'
+      - job: Initialize
+        displayName: 'Terraform Initialize'
         steps:
           - task: TerraformInstaller@1
             inputs:
@@ -66,7 +66,7 @@ stages:
   # Development Deployment Stage
   - stage: DeployDev
     displayName: Deploy to Development
-    dependsOn: Validate
+    dependsOn: Initialize
     condition: succeeded()
     variables:
       - group: terraform-variables-dev
@@ -91,7 +91,7 @@ stages:
               cp -r $(System.ArtifactsDirectory)/terraform-initialized/* ./
               cd terraform/
               
-              echo "Re-initializing Terraform with backend for Dev environment..."
+              echo "initializing Terraform with backend for Dev environment..."
               terraform init \
                 -backend-config="storage_account_name=$(TF_BACKEND_STORAGE_ACCOUNT)" \
                 -backend-config="container_name=$(TF_BACKEND_CONTAINER)" \
