@@ -52,10 +52,10 @@ resource "azurerm_container_app_custom_domain" "portfolio" {
   # This enables the free managed certificate
   certificate_binding_type = "SniEnabled"
 
-  lifecycle {
-    // With Azure created Managed Certificates these prevent resource recreation.
-    ignore_changes = [certificate_binding_type, container_app_environment_certificate_id]
-  }
+  # lifecycle {
+  #   // With Azure created Managed Certificates these prevent resource recreation.
+  #   ignore_changes = [certificate_binding_type, container_app_environment_certificate_id]
+  # }
 }
 
 resource "azurerm_container_app_custom_domain" "portfolio_www" {
@@ -64,7 +64,7 @@ resource "azurerm_container_app_custom_domain" "portfolio_www" {
   
   certificate_binding_type = "SniEnabled"
   
-  lifecycle {
-    ignore_changes = [certificate_binding_type, container_app_environment_certificate_id]
-  }
+  # lifecycle {
+  #   ignore_changes = [certificate_binding_type, container_app_environment_certificate_id]
+  # }
 }
